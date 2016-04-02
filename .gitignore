@@ -1,0 +1,32 @@
+# http://git-scm.com/docs/gitignore
+
+# Eclipse
+
+**/.project
+**/.settings
+**/.classpath
+**/.springBeans
+
+# Intellij
+
+**/.idea/**
+**/*.iml
+**/*.ipr
+**/*.iws
+.idea
+*.iml
+
+# misc
+
+**/classes/**
+**/.external*
+**/target/**
+target
+**/test-output/**
+**/junk/**
+**/*.log
+**/.DS_STORE
+
+#*.gitignore
+#bin
+
