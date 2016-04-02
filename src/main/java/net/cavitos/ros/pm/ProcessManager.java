@@ -1,15 +1,11 @@
 package net.cavitos.ros.pm;
 
-import com.sun.jna.Library;
 import com.sun.jna.Native;
-import com.sun.jna.Platform;
 import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.Tlhelp32;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinNT;
 import com.sun.jna.win32.W32APIOptions;
-
-import java.util.Scanner;
 
 public class ProcessManager {
 
@@ -34,8 +30,8 @@ public class ProcessManager {
         WinNT.HANDLE snapshot = kernel32.CreateToolhelp32Snapshot(Tlhelp32.TH32CS_SNAPPROCESS, new WinDef.DWORD(0));
         try  {
             while (kernel32.Process32Next(snapshot, processEntry)) {
-                System.out.printf("PID: %d, Name: %s\n", Integer.parseInt(processEntry.th32ProcessID.toString()),
-                        Native.toString(processEntry.szExeFile));
+                System.out.printf("PID: %d, Name: %s, Size: %d\n", Integer.parseInt(processEntry.th32ProcessID.toString()),
+                        Native.toString(processEntry.szExeFile), processEntry.size());
 //                System.out.println(processEntry.th32ProcessID + "\t" + Native.toString(processEntry.szExeFile));
             }
         }
