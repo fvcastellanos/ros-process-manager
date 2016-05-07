@@ -1,41 +1,39 @@
 package net.cavitos.ros.pm;
 
-import com.sun.jna.Native;
-import com.sun.jna.platform.win32.*;
-import com.sun.jna.win32.W32APIOptions;
+import net.cavitos.ros.pm.dto.ProcessInfo;
+import org.codehaus.jackson.map.ObjectMapper;
+
+import java.io.File;
+import java.util.List;
 
 public class ProcessManager {
 
-    public static void main(String[] args) {
-/*
-        Kernel32 INSTANCE = (Kernel32) Native.loadLibrary("kernel32", Kernel32.class);
-        // Optional: wraps every call to the native library in a
-        // synchronized block, limiting native calls to one at a time
-        Kernel32 SYNC_INSTANCE = (Kernel32) Native.synchronizedLibrary(INSTANCE);
+    private ObjectMapper objectMapper;
+    private ProcessService processService;
 
-        System.out.println("Current thread: " + SYNC_INSTANCE.GetCurrentThread().toString());
-        System.out.println("Current process: " + SYNC_INSTANCE.GetCurrentProcess().toString());
+    public ProcessManager() {
+        processService = new ProcessService();
+        objectMapper = new ObjectMapper();
+    }
 
-        Scanner scanner = new Scanner(System.in);
-
-        scanner.nextInt();
-*/
-
-        Kernel32 kernel32 = (Kernel32) Native.loadLibrary(Kernel32.class, W32APIOptions.UNICODE_OPTIONS);
-        Tlhelp32.PROCESSENTRY32.ByReference processEntry = new Tlhelp32.PROCESSENTRY32.ByReference();
-//        User32 user32 = (User32) Native.loadLibrary("user32", User32.class);
-
-        WinNT.HANDLE snapshot = kernel32.CreateToolhelp32Snapshot(Tlhelp32.TH32CS_SNAPPROCESS, new WinDef.DWORD(0));
-        try  {
-            while (kernel32.Process32Next(snapshot, processEntry)) {
-                System.out.printf("PID: %d, Name: %s, Size: %d\n", Integer.parseInt(processEntry.th32ProcessID.toString()),
-                        Native.toString(processEntry.szExeFile), processEntry.size());
-
-//                System.out.println(processEntry.th32ProcessID + "\t" + Native.toString(processEntry.szExeFile));
-            }
+    public void writeProcessListToFile() {
+        try {
+            List<ProcessInfo> processInfoList = processService.getProcessList();
+            objectMapper.writeValue(new File("process-list.json"), processInfoList);
+        } catch(Exception ex) {
+            ex.printStackTrace();
         }
-        finally {
-            kernel32.CloseHandle(snapshot);
+    }
+
+    public static void main(String[] args) {
+        ProcessManager pm = new ProcessManager();
+        if(args.length > 0) {
+            String op = args[0].toLowerCase();
+            if(op.equals("list")) {
+                pm.writeProcessListToFile();
+            }
+        } else {
+            System.out.println("Parameters: list, kill <pid>");
         }
     }
 
