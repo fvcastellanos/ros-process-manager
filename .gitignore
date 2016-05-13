@@ -1,5 +1,12 @@
 # http://git-scm.com/docs/gitignore
 
+
+#netbeans specific
+core
+nbproject/*
+!nbproject/project.properties
+!nbproject/project.xml
+
 # Eclipse
 
 **/.project
@@ -29,4 +36,3 @@ target
 
 #*.gitignore
 #bin
-
