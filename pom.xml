@@ -28,6 +28,21 @@
           <artifactId>jackson-mapper-asl</artifactId>
           <version>1.9.13</version>
       </dependency>
+    <dependency>
+      <groupId>org.jdesktop</groupId>
+      <artifactId>beansbinding</artifactId>
+      <version>1.2.1</version>
+    </dependency>
+    <dependency>
+        <groupId>org.quartz-scheduler</groupId>
+        <artifactId>quartz</artifactId>
+        <version>2.2.1</version>
+    </dependency>
+    <dependency>
+        <groupId>org.quartz-scheduler</groupId>
+        <artifactId>quartz-jobs</artifactId>
+        <version>2.2.1</version>
+    </dependency>       
   </dependencies>
 
   <build>
@@ -39,7 +54,9 @@
                   <archive>
                       <manifest>
                           <addClasspath>true</addClasspath>
-                          <mainClass>net.cavitos.ros.pm.ProcessManager</mainClass>
+                          <!--<mainClass>net.cavitos.ros.pm.ProcessManager</mainClass>-->
+                          <!--<mainClass>net.cavitos.ros.pm.ui.ProcessManagerFx</mainClass>-->
+                          <mainClass>net.cavitos.ros.pm.ui.ProcessManagerUI</mainClass>
                       </manifest>
                   </archive>
               </configuration>

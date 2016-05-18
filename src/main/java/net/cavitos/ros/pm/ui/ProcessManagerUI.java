@@ -6,6 +6,8 @@
 package net.cavitos.ros.pm.ui;
 
 import java.util.List;
+import javax.swing.JOptionPane;
+import net.cavitos.ros.pm.ProcessService;
 import net.cavitos.ros.pm.dto.ProcessInfo;
 
 /**
@@ -14,12 +16,15 @@ import net.cavitos.ros.pm.dto.ProcessInfo;
  */
 public class ProcessManagerUI extends javax.swing.JFrame {
 
-    private List<ProcessInfo> processList;
+    private ProcessService processService;
+    public List<ProcessInfo> processList;
     
     /**
      * Creates new form ProcessManagerUI
      */
     public ProcessManagerUI() {
+        processService = new ProcessService();
+        processList = processService.getProcessList();
         initComponents();
     }
 
@@ -31,47 +36,103 @@ public class ProcessManagerUI extends javax.swing.JFrame {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
+        bindingGroup = new org.jdesktop.beansbinding.BindingGroup();
 
-        pnTop = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
+        spProcess = new javax.swing.JScrollPane();
         tbProcess = new javax.swing.JTable();
+        pnOptions = new javax.swing.JPanel();
+        btnKillProcess = new javax.swing.JButton();
+        btnExit = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("ReactOS - Process Manager");
 
-        javax.swing.GroupLayout pnTopLayout = new javax.swing.GroupLayout(pnTop);
-        pnTop.setLayout(pnTopLayout);
-        pnTopLayout.setHorizontalGroup(
-            pnTopLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 709, Short.MAX_VALUE)
-        );
-        pnTopLayout.setVerticalGroup(
-            pnTopLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 80, Short.MAX_VALUE)
-        );
+        tbProcess.getTableHeader().setReorderingAllowed(false);
 
-        jScrollPane1.setViewportView(tbProcess);
+        org.jdesktop.beansbinding.ELProperty eLProperty = org.jdesktop.beansbinding.ELProperty.create("${processList}");
+        org.jdesktop.swingbinding.JTableBinding jTableBinding = org.jdesktop.swingbinding.SwingBindings.createJTableBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, this, eLProperty, tbProcess);
+        org.jdesktop.swingbinding.JTableBinding.ColumnBinding columnBinding = jTableBinding.addColumnBinding(org.jdesktop.beansbinding.ELProperty.create("${pId}"));
+        columnBinding.setColumnName("PId");
+        columnBinding.setColumnClass(Integer.class);
+        columnBinding = jTableBinding.addColumnBinding(org.jdesktop.beansbinding.ELProperty.create("${name}"));
+        columnBinding.setColumnName("Process Name");
+        columnBinding.setColumnClass(String.class);
+        columnBinding = jTableBinding.addColumnBinding(org.jdesktop.beansbinding.ELProperty.create("${memoryUssage}"));
+        columnBinding.setColumnName("Memory usage");
+        columnBinding.setColumnClass(Long.class);
+        bindingGroup.addBinding(jTableBinding);
+        jTableBinding.bind();
+        spProcess.setViewportView(tbProcess);
+
+        btnKillProcess.setText("Kill process");
+        btnKillProcess.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnKillProcessActionPerformed(evt);
+            }
+        });
+
+        btnExit.setText("Exit");
+        btnExit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExitActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout pnOptionsLayout = new javax.swing.GroupLayout(pnOptions);
+        pnOptions.setLayout(pnOptionsLayout);
+        pnOptionsLayout.setHorizontalGroup(
+            pnOptionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnOptionsLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnOptionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnKillProcess, javax.swing.GroupLayout.DEFAULT_SIZE, 109, Short.MAX_VALUE)
+                    .addComponent(btnExit, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        pnOptionsLayout.setVerticalGroup(
+            pnOptionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnOptionsLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(btnKillProcess)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(btnExit)
+                .addContainerGap())
+        );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(pnTop, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(0, 0, 0)
+                .addComponent(spProcess, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(pnOptions, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(pnTop, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 332, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(112, 112, 112))
+            .addComponent(spProcess, javax.swing.GroupLayout.DEFAULT_SIZE, 531, Short.MAX_VALUE)
+            .addComponent(pnOptions, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
+
+        bindingGroup.bind();
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnKillProcessActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnKillProcessActionPerformed
+        // TODO add your handling code here:
+        try {
+            processService.killProcess(Long.MIN_VALUE);
+        } catch(Exception ex) {
+            JOptionPane.showMessageDialog(this, "Exception - " + ex.getMessage());
+        }
+    }//GEN-LAST:event_btnKillProcessActionPerformed
+
+    private void btnExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExitActionPerformed
+        // TODO add your handling code here:
+        System.exit(0);
+    }//GEN-LAST:event_btnExitActionPerformed
 
     /**
      * @param args the command line arguments
@@ -109,9 +170,12 @@ public class ProcessManagerUI extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JPanel pnTop;
+    private javax.swing.JButton btnExit;
+    private javax.swing.JButton btnKillProcess;
+    private javax.swing.JPanel pnOptions;
+    private javax.swing.JScrollPane spProcess;
     private javax.swing.JTable tbProcess;
+    private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
 
 
