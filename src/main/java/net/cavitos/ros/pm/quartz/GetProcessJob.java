@@ -5,7 +5,11 @@
  */
 package net.cavitos.ros.pm.quartz;
 
+import java.util.List;
+import net.cavitos.ros.pm.ProcessService;
+import net.cavitos.ros.pm.dto.ProcessInfo;
 import org.quartz.Job;
+import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
@@ -16,7 +20,11 @@ import org.quartz.JobExecutionException;
 public class GetProcessJob implements Job {
 
     public void execute(JobExecutionContext jec) throws JobExecutionException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        JobDataMap jobDataMap = jec.getMergedJobDataMap();
+        List<ProcessInfo> processList = (List<ProcessInfo>) jobDataMap.get("processList");
+        ProcessService processService = (ProcessService) jobDataMap.get("processService");
+        processList = processService.getProcessList();
+        System.out.println("Process list acquired");
     }
     
 }

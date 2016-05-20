@@ -1,51 +1,85 @@
 package net.cavitos.ros.pm;
 
-import com.sun.jna.Native;
-import com.sun.jna.platform.win32.Kernel32;
-import com.sun.jna.platform.win32.Tlhelp32;
-import com.sun.jna.platform.win32.WinDef;
-import com.sun.jna.platform.win32.WinNT;
-import com.sun.jna.win32.W32APIOptions;
 import net.cavitos.ros.pm.dto.ProcessInfo;
+import org.hyperic.sigar.ProcMem;
+import org.hyperic.sigar.Sigar;
+import org.hyperic.sigar.SigarPermissionDeniedException;
+import org.hyperic.sigar.SigarProxy;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.hyperic.sigar.cmd.Kill;
 
 public class ProcessService {
+    
+    private SigarProxy proxy;
+    
+    public ProcessService() {
+        proxy = new Sigar();
+    }
+    
+    private String getProcessName(long id) {
+        String name = "???";
+        try {
+            name = proxy.getProcExe(id).getName();
+        } catch(SigarPermissionDeniedException ex) {
+            name = "Denied";
+        } catch (Exception ex) {
 
-    private ProcessInfo buildProcessInfo(Tlhelp32.PROCESSENTRY32.ByReference processEntry) {
-        ProcessInfo pi = ProcessInfo.newBuilder()
-            .withPId(Integer.parseInt(processEntry.th32ProcessID.toString()))
-            .withName(Native.toString(processEntry.szExeFile))
-            .withMemoryUssage(new Long(processEntry.size()))
-            .build();
+        }
 
-        return pi;
+        return name;
+    }
+
+    private Long getProcessMemory(long id) {
+        Long size = 0L;
+        try {
+            ProcMem mem = proxy.getProcMem(id);
+            size = (mem.getSize() /1024) / 1024;
+        } catch(Exception ex) {
+
+        }
+
+        return size;
     }
 
     public List<ProcessInfo> getProcessList() {
-
         List<ProcessInfo> processList = new ArrayList<ProcessInfo>();
+//        SigarProxy proxy = new Sigar();
 
-        Kernel32 kernel32 = (Kernel32) Native.loadLibrary(Kernel32.class, W32APIOptions.UNICODE_OPTIONS);
-        Tlhelp32.PROCESSENTRY32.ByReference processEntry = new Tlhelp32.PROCESSENTRY32.ByReference();
+        try {
+            ProcessInfo info;
+            long [] idList  = proxy.getProcList();
 
-        WinNT.HANDLE snapshot = kernel32.CreateToolhelp32Snapshot(Tlhelp32.TH32CS_SNAPPROCESS, new WinDef.DWORD(0));
-        try  {
-            while (kernel32.Process32Next(snapshot, processEntry)) {
-                processList.add(buildProcessInfo(processEntry));
+            for(long id : idList) {
+                String name = getProcessName(id);
+                if(!name.equals("Denied")) {
+                    info = ProcessInfo.newBuilder()
+                        .withPId(id)
+                        .withName(name)
+                        .withMemoryUssage(getProcessMemory(id))
+                        .build();
+                    processList.add(info);
+                }
             }
-        }
-        finally {
-            kernel32.CloseHandle(snapshot);
-        }
 
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
         return processList;
-
     }
 
-    public void killProcess(Long id) {
-        throw new NotImplementedException();
+    public boolean killProcess(Long id) {
+        boolean killed = true;
+        try {
+            String signal = "SIGTERM";
+            Sigar sigarKill = new Sigar();
+            sigarKill.kill(id, signal);
+        } catch(Exception ex) {
+            killed = false;
+        }
+        
+        return killed;
     }
 }

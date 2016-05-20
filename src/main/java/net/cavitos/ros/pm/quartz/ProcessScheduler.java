@@ -5,7 +5,11 @@
  */
 package net.cavitos.ros.pm.quartz;
 
+import java.util.List;
+import net.cavitos.ros.pm.ProcessService;
+import net.cavitos.ros.pm.dto.ProcessInfo;
 import static org.quartz.JobBuilder.newJob;
+import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
@@ -21,11 +25,18 @@ public class ProcessScheduler {
     
     private Scheduler scheduler;
     
-    private JobDetail buildGetProcessJob() {
+    private JobDataMap buildDataMap(List<ProcessInfo> processList, ProcessService processService) {
+        JobDataMap jobDataMap = new JobDataMap();
+        jobDataMap.put("processList", processList);
+        jobDataMap.put("processService", processService);
+        return jobDataMap;
+    }
+    
+    private JobDetail buildGetProcessJob(List<ProcessInfo> processList, ProcessService processService) {
         JobDetail job = newJob(GetProcessJob.class)
                 .withIdentity("getProcessList")
+                .usingJobData(buildDataMap(processList, processService))
                 .build();
-        
         return job;
     }
     
@@ -41,9 +52,17 @@ public class ProcessScheduler {
         return trigger;
     }
     
-    public void scheduleGetProcessListJob() throws Exception {
+    public void scheduleGetProcessListJob(List<ProcessInfo> processList, ProcessService processService) throws Exception {
         scheduler = StdSchedulerFactory.getDefaultScheduler();
-        scheduler.scheduleJob(buildGetProcessJob(), buildGetProcessTrigger());
+        scheduler.scheduleJob(buildGetProcessJob(processList, processService), buildGetProcessTrigger());
         scheduler.start();
+    }
+    
+    public void shutdown() {
+        try {
+            scheduler.shutdown(true);
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
     }
 }

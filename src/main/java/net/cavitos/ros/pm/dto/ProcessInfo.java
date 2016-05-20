@@ -1,9 +1,13 @@
 package net.cavitos.ros.pm.dto;
 
 public class ProcessInfo {
-    private Integer pId;
+    private Long pId;
     private String name;
     private Long memoryUssage;
+
+    public ProcessInfo() {
+
+    }
 
     private ProcessInfo(Builder builder) {
         pId = builder.pId;
@@ -11,11 +15,11 @@ public class ProcessInfo {
         memoryUssage = builder.memoryUssage;
     }
 
-    public Integer getpId() {
+    public Long getpId() {
         return pId;
     }
 
-    public void setpId(Integer pId) {
+    public void setpId(Long pId) {
         this.pId = pId;
     }
 
@@ -40,14 +44,14 @@ public class ProcessInfo {
     }
 
     public static final class Builder {
-        private Integer pId;
+        private Long pId;
         private String name;
         private Long memoryUssage;
 
         private Builder() {
         }
 
-        public Builder withPId(Integer val) {
+        public Builder withPId(Long val) {
             pId = val;
             return this;
         }

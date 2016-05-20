@@ -9,6 +9,7 @@ import java.util.List;
 import javax.swing.JOptionPane;
 import net.cavitos.ros.pm.ProcessService;
 import net.cavitos.ros.pm.dto.ProcessInfo;
+import net.cavitos.ros.pm.quartz.ProcessScheduler;
 
 /**
  *
@@ -19,6 +20,8 @@ public class ProcessManagerUI extends javax.swing.JFrame {
     private ProcessService processService;
     public List<ProcessInfo> processList;
     
+    private ProcessScheduler processScheduler;
+    
     /**
      * Creates new form ProcessManagerUI
      */
@@ -26,8 +29,18 @@ public class ProcessManagerUI extends javax.swing.JFrame {
         processService = new ProcessService();
         processList = processService.getProcessList();
         initComponents();
+        initScheduler();
     }
 
+    private void initScheduler() {
+        try {
+            processScheduler = new ProcessScheduler();
+            processScheduler.scheduleGetProcessListJob(processList, processService);
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -53,13 +66,16 @@ public class ProcessManagerUI extends javax.swing.JFrame {
         org.jdesktop.swingbinding.JTableBinding jTableBinding = org.jdesktop.swingbinding.SwingBindings.createJTableBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, this, eLProperty, tbProcess);
         org.jdesktop.swingbinding.JTableBinding.ColumnBinding columnBinding = jTableBinding.addColumnBinding(org.jdesktop.beansbinding.ELProperty.create("${pId}"));
         columnBinding.setColumnName("PId");
-        columnBinding.setColumnClass(Integer.class);
+        columnBinding.setColumnClass(Long.class);
+        columnBinding.setEditable(false);
         columnBinding = jTableBinding.addColumnBinding(org.jdesktop.beansbinding.ELProperty.create("${name}"));
         columnBinding.setColumnName("Process Name");
         columnBinding.setColumnClass(String.class);
+        columnBinding.setEditable(false);
         columnBinding = jTableBinding.addColumnBinding(org.jdesktop.beansbinding.ELProperty.create("${memoryUssage}"));
-        columnBinding.setColumnName("Memory usage");
+        columnBinding.setColumnName("Memory usage (MB)");
         columnBinding.setColumnClass(Long.class);
+        columnBinding.setEditable(false);
         bindingGroup.addBinding(jTableBinding);
         jTableBinding.bind();
         spProcess.setViewportView(tbProcess);
@@ -105,7 +121,7 @@ public class ProcessManagerUI extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(0, 0, 0)
-                .addComponent(spProcess, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(spProcess)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(pnOptions, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -131,6 +147,7 @@ public class ProcessManagerUI extends javax.swing.JFrame {
 
     private void btnExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExitActionPerformed
         // TODO add your handling code here:
+        processScheduler.shutdown();
         System.exit(0);
     }//GEN-LAST:event_btnExitActionPerformed
 
@@ -138,6 +155,9 @@ public class ProcessManagerUI extends javax.swing.JFrame {
      * @param args the command line arguments
      */
     public static void main(String args[]) {
+        System.load("C:\\Users\\fvcg\\Desktop\\dll\\sigar-amd64-winnt.dll");
+
+
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
