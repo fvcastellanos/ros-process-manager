@@ -6,21 +6,23 @@
 package net.cavitos.ros.pm.ui;
 
 import java.util.List;
+import javafx.collections.ObservableList;
 import javax.swing.JOptionPane;
 import net.cavitos.ros.pm.ProcessService;
 import net.cavitos.ros.pm.dto.ProcessInfo;
 import net.cavitos.ros.pm.quartz.ProcessScheduler;
+import org.jdesktop.swingbinding.JTableBinding;
 
 /**
  *
  * @author fvcg
  */
 public class ProcessManagerUI extends javax.swing.JFrame {
-
     private ProcessService processService;
-    public List<ProcessInfo> processList;
-    
     private ProcessScheduler processScheduler;
+
+    //public List<ProcessInfo> processList;
+    public ObservableList<ProcessInfo> processList;
     
     /**
      * Creates new form ProcessManagerUI
@@ -56,6 +58,7 @@ public class ProcessManagerUI extends javax.swing.JFrame {
         pnOptions = new javax.swing.JPanel();
         btnKillProcess = new javax.swing.JButton();
         btnExit = new javax.swing.JButton();
+        lbProcesses = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("ReactOS - Process Manager");
@@ -94,6 +97,8 @@ public class ProcessManagerUI extends javax.swing.JFrame {
             }
         });
 
+        lbProcesses.setText("Processes:");
+
         javax.swing.GroupLayout pnOptionsLayout = new javax.swing.GroupLayout(pnOptions);
         pnOptions.setLayout(pnOptionsLayout);
         pnOptionsLayout.setHorizontalGroup(
@@ -102,7 +107,10 @@ public class ProcessManagerUI extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(pnOptionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btnKillProcess, javax.swing.GroupLayout.DEFAULT_SIZE, 109, Short.MAX_VALUE)
-                    .addComponent(btnExit, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(btnExit, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(pnOptionsLayout.createSequentialGroup()
+                        .addComponent(lbProcesses)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         pnOptionsLayout.setVerticalGroup(
@@ -110,9 +118,11 @@ public class ProcessManagerUI extends javax.swing.JFrame {
             .addGroup(pnOptionsLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(btnKillProcess)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnExit)
-                .addContainerGap())
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(lbProcesses)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -136,10 +146,20 @@ public class ProcessManagerUI extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private Long getSelectedProcessId() {
+        int selected = tbProcess.getSelectedRow();
+        Long id = (Long) tbProcess.getValueAt(selected, 0);
+        return id;
+    }
+    
     private void btnKillProcessActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnKillProcessActionPerformed
         // TODO add your handling code here:
         try {
-            processService.killProcess(Long.MIN_VALUE);
+            processService.killProcess(getSelectedProcessId());
+            
+            JTableBinding binding = (JTableBinding) bindingGroup.getBindings().get(0);
+            binding.refresh();
+            
         } catch(Exception ex) {
             JOptionPane.showMessageDialog(this, "Exception - " + ex.getMessage());
         }
@@ -156,7 +176,6 @@ public class ProcessManagerUI extends javax.swing.JFrame {
      */
     public static void main(String args[]) {
         System.load("C:\\Users\\fvcg\\Desktop\\dll\\sigar-amd64-winnt.dll");
-
 
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -192,6 +211,7 @@ public class ProcessManagerUI extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnExit;
     private javax.swing.JButton btnKillProcess;
+    private javax.swing.JLabel lbProcesses;
     private javax.swing.JPanel pnOptions;
     private javax.swing.JScrollPane spProcess;
     private javax.swing.JTable tbProcess;
@@ -199,7 +219,7 @@ public class ProcessManagerUI extends javax.swing.JFrame {
     // End of variables declaration//GEN-END:variables
 
 
-    public List<ProcessInfo> getProcessList() {
+    public ObservableList<ProcessInfo> getProcessList() {
         return processList;
     }
 }

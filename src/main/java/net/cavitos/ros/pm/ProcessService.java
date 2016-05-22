@@ -5,15 +5,15 @@ import org.hyperic.sigar.ProcMem;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarPermissionDeniedException;
 import org.hyperic.sigar.SigarProxy;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.hyperic.sigar.cmd.Kill;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 public class ProcessService {
     
-    private SigarProxy proxy;
+    private final SigarProxy proxy;
     
     public ProcessService() {
         proxy = new Sigar();
@@ -38,16 +38,18 @@ public class ProcessService {
             ProcMem mem = proxy.getProcMem(id);
             size = (mem.getSize() /1024) / 1024;
         } catch(Exception ex) {
-
+            ex.printStackTrace();
         }
 
         return size;
     }
 
-    public List<ProcessInfo> getProcessList() {
-        List<ProcessInfo> processList = new ArrayList<ProcessInfo>();
-//        SigarProxy proxy = new Sigar();
+//    public List<ProcessInfo> getProcessList() {
+    
 
+    public ObservableList<ProcessInfo> getProcessList() {
+        
+        List<ProcessInfo> processList = new ArrayList<ProcessInfo>();
         try {
             ProcessInfo info;
             long [] idList  = proxy.getProcList();
@@ -67,7 +69,7 @@ public class ProcessService {
         } catch(Exception ex) {
             ex.printStackTrace();
         }
-        return processList;
+        return FXCollections.observableList(processList);
     }
 
     public boolean killProcess(Long id) {

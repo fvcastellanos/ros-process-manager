@@ -5,7 +5,7 @@
  */
 package net.cavitos.ros.pm.quartz;
 
-import java.util.List;
+import javafx.collections.ObservableList;
 import net.cavitos.ros.pm.ProcessService;
 import net.cavitos.ros.pm.dto.ProcessInfo;
 import org.quartz.Job;
@@ -21,9 +21,13 @@ public class GetProcessJob implements Job {
 
     public void execute(JobExecutionContext jec) throws JobExecutionException {
         JobDataMap jobDataMap = jec.getMergedJobDataMap();
-        List<ProcessInfo> processList = (List<ProcessInfo>) jobDataMap.get("processList");
+        ObservableList<ProcessInfo> processList = (ObservableList<ProcessInfo>) jobDataMap.get("processList");
         ProcessService processService = (ProcessService) jobDataMap.get("processService");
-        processList = processService.getProcessList();
+        // processList.clear();
+        processList.clear();
+        for(ProcessInfo info : processService.getProcessList()) {
+            processList.add(info);
+        }
         System.out.println("Process list acquired");
     }
     
