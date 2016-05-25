@@ -38,7 +38,8 @@ public class ProcessService {
             ProcMem mem = proxy.getProcMem(id);
             size = (mem.getSize() /1024) / 1024;
         } catch(Exception ex) {
-            ex.printStackTrace();
+//            ex.printStackTrace();
+            size = 0L;
         }
 
         return size;
@@ -47,7 +48,7 @@ public class ProcessService {
 //    public List<ProcessInfo> getProcessList() {
     
 
-    public ObservableList<ProcessInfo> getProcessList() {
+    public List<ProcessInfo> getProcessList() {
         
         List<ProcessInfo> processList = new ArrayList<ProcessInfo>();
         try {
@@ -69,7 +70,7 @@ public class ProcessService {
         } catch(Exception ex) {
             ex.printStackTrace();
         }
-        return FXCollections.observableList(processList);
+        return processList;
     }
 
     public boolean killProcess(Long id) {

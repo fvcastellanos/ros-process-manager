@@ -8,6 +8,7 @@ package net.cavitos.ros.pm.quartz;
 import java.util.List;
 import net.cavitos.ros.pm.ProcessService;
 import net.cavitos.ros.pm.dto.ProcessInfo;
+import net.cavitos.ros.pm.ui.FillTableStrategy;
 import static org.quartz.JobBuilder.newJob;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -25,17 +26,16 @@ public class ProcessScheduler {
     
     private Scheduler scheduler;
     
-    private JobDataMap buildDataMap(List<ProcessInfo> processList, ProcessService processService) {
+    private JobDataMap buildDataMap(FillTableStrategy fillTableStrategy) {
         JobDataMap jobDataMap = new JobDataMap();
-        jobDataMap.put("processList", processList);
-        jobDataMap.put("processService", processService);
+        jobDataMap.put("fillTableStrategy", fillTableStrategy);
         return jobDataMap;
     }
     
-    private JobDetail buildGetProcessJob(List<ProcessInfo> processList, ProcessService processService) {
+    private JobDetail buildGetProcessJob(FillTableStrategy fillTableStrategy) {
         JobDetail job = newJob(GetProcessJob.class)
                 .withIdentity("getProcessList")
-                .usingJobData(buildDataMap(processList, processService))
+                .usingJobData(buildDataMap(fillTableStrategy))
                 .build();
         return job;
     }
@@ -52,10 +52,26 @@ public class ProcessScheduler {
         return trigger;
     }
     
-    public void scheduleGetProcessListJob(List<ProcessInfo> processList, ProcessService processService) throws Exception {
+    public void scheduleGetProcessListJob(FillTableStrategy fillTableStrategy) throws Exception {
         scheduler = StdSchedulerFactory.getDefaultScheduler();
-        scheduler.scheduleJob(buildGetProcessJob(processList, processService), buildGetProcessTrigger());
+        scheduler.scheduleJob(buildGetProcessJob(fillTableStrategy), buildGetProcessTrigger());
         scheduler.start();
+    }
+    
+    public void start() {
+        try {
+            scheduler.start();
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+    
+    public void standBy() {
+        try {
+            scheduler.standby();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
     
     public void shutdown() {

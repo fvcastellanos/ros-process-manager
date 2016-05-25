@@ -6,12 +6,11 @@
 package net.cavitos.ros.pm.ui;
 
 import java.util.List;
-import javafx.collections.ObservableList;
 import javax.swing.JOptionPane;
+import javax.swing.table.TableModel;
 import net.cavitos.ros.pm.ProcessService;
 import net.cavitos.ros.pm.dto.ProcessInfo;
 import net.cavitos.ros.pm.quartz.ProcessScheduler;
-import org.jdesktop.swingbinding.JTableBinding;
 
 /**
  *
@@ -20,9 +19,11 @@ import org.jdesktop.swingbinding.JTableBinding;
 public class ProcessManagerUI extends javax.swing.JFrame {
     private ProcessService processService;
     private ProcessScheduler processScheduler;
+    private FillTableStrategy fillTableStrategy;
 
-    //public List<ProcessInfo> processList;
-    public ObservableList<ProcessInfo> processList;
+    public List<ProcessInfo> processList;
+    
+    private TableModel tableModel;
     
     /**
      * Creates new form ProcessManagerUI
@@ -31,13 +32,20 @@ public class ProcessManagerUI extends javax.swing.JFrame {
         processService = new ProcessService();
         processList = processService.getProcessList();
         initComponents();
+        configureTableModel();
         initScheduler();
     }
 
+    private void configureTableModel() {
+        fillTableStrategy = new FillTableStrategy(processService, tbProcess);
+        fillTableStrategy.buildTableModel();
+    }
+    
     private void initScheduler() {
         try {
             processScheduler = new ProcessScheduler();
-            processScheduler.scheduleGetProcessListJob(processList, processService);
+            processScheduler.scheduleGetProcessListJob(fillTableStrategy);
+            processScheduler.standBy();
         } catch(Exception ex) {
             ex.printStackTrace();
         }
@@ -51,37 +59,45 @@ public class ProcessManagerUI extends javax.swing.JFrame {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        bindingGroup = new org.jdesktop.beansbinding.BindingGroup();
 
         spProcess = new javax.swing.JScrollPane();
         tbProcess = new javax.swing.JTable();
         pnOptions = new javax.swing.JPanel();
         btnKillProcess = new javax.swing.JButton();
         btnExit = new javax.swing.JButton();
-        lbProcesses = new javax.swing.JLabel();
+        chbRefresh = new javax.swing.JCheckBox();
+        btnRefresh = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("ReactOS - Process Manager");
 
-        tbProcess.getTableHeader().setReorderingAllowed(false);
+        tbProcess.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
 
-        org.jdesktop.beansbinding.ELProperty eLProperty = org.jdesktop.beansbinding.ELProperty.create("${processList}");
-        org.jdesktop.swingbinding.JTableBinding jTableBinding = org.jdesktop.swingbinding.SwingBindings.createJTableBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, this, eLProperty, tbProcess);
-        org.jdesktop.swingbinding.JTableBinding.ColumnBinding columnBinding = jTableBinding.addColumnBinding(org.jdesktop.beansbinding.ELProperty.create("${pId}"));
-        columnBinding.setColumnName("PId");
-        columnBinding.setColumnClass(Long.class);
-        columnBinding.setEditable(false);
-        columnBinding = jTableBinding.addColumnBinding(org.jdesktop.beansbinding.ELProperty.create("${name}"));
-        columnBinding.setColumnName("Process Name");
-        columnBinding.setColumnClass(String.class);
-        columnBinding.setEditable(false);
-        columnBinding = jTableBinding.addColumnBinding(org.jdesktop.beansbinding.ELProperty.create("${memoryUssage}"));
-        columnBinding.setColumnName("Memory usage (MB)");
-        columnBinding.setColumnClass(Long.class);
-        columnBinding.setEditable(false);
-        bindingGroup.addBinding(jTableBinding);
-        jTableBinding.bind();
+            },
+            new String [] {
+                "PId", "Process", "Memory (MB)"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Long.class, java.lang.String.class, java.lang.Long.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        tbProcess.setColumnSelectionAllowed(true);
+        tbProcess.getTableHeader().setReorderingAllowed(false);
         spProcess.setViewportView(tbProcess);
+        tbProcess.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
 
         btnKillProcess.setText("Kill process");
         btnKillProcess.addActionListener(new java.awt.event.ActionListener() {
@@ -97,20 +113,33 @@ public class ProcessManagerUI extends javax.swing.JFrame {
             }
         });
 
-        lbProcesses.setText("Processes:");
+        chbRefresh.setText("Use automatic refresh");
+        chbRefresh.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chbRefreshActionPerformed(evt);
+            }
+        });
+
+        btnRefresh.setText("Refresh");
+        btnRefresh.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRefreshActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout pnOptionsLayout = new javax.swing.GroupLayout(pnOptions);
         pnOptions.setLayout(pnOptionsLayout);
         pnOptionsLayout.setHorizontalGroup(
             pnOptionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnOptionsLayout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnOptionsLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(pnOptionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnKillProcess, javax.swing.GroupLayout.DEFAULT_SIZE, 109, Short.MAX_VALUE)
-                    .addComponent(btnExit, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(pnOptionsLayout.createSequentialGroup()
-                        .addComponent(lbProcesses)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addGroup(pnOptionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(btnExit, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnKillProcess, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, pnOptionsLayout.createSequentialGroup()
+                        .addComponent(chbRefresh)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(btnRefresh, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         pnOptionsLayout.setVerticalGroup(
@@ -119,10 +148,12 @@ public class ProcessManagerUI extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(btnKillProcess)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnRefresh)
+                .addGap(9, 9, 9)
+                .addComponent(chbRefresh)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(btnExit)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(lbProcesses)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -131,7 +162,7 @@ public class ProcessManagerUI extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(0, 0, 0)
-                .addComponent(spProcess)
+                .addComponent(spProcess, javax.swing.GroupLayout.DEFAULT_SIZE, 450, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(pnOptions, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -140,8 +171,6 @@ public class ProcessManagerUI extends javax.swing.JFrame {
             .addComponent(spProcess, javax.swing.GroupLayout.DEFAULT_SIZE, 531, Short.MAX_VALUE)
             .addComponent(pnOptions, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
-
-        bindingGroup.bind();
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -157,9 +186,6 @@ public class ProcessManagerUI extends javax.swing.JFrame {
         try {
             processService.killProcess(getSelectedProcessId());
             
-            JTableBinding binding = (JTableBinding) bindingGroup.getBindings().get(0);
-            binding.refresh();
-            
         } catch(Exception ex) {
             JOptionPane.showMessageDialog(this, "Exception - " + ex.getMessage());
         }
@@ -171,11 +197,28 @@ public class ProcessManagerUI extends javax.swing.JFrame {
         System.exit(0);
     }//GEN-LAST:event_btnExitActionPerformed
 
+    private void chbRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chbRefreshActionPerformed
+        // TODO add your handling code here:
+        if(chbRefresh.isSelected()) {
+            btnRefresh.setEnabled(false);
+            processScheduler.start();
+        } else {
+            btnRefresh.setEnabled(true);
+            processScheduler.standBy();
+        }
+    }//GEN-LAST:event_chbRefreshActionPerformed
+
+    private void btnRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefreshActionPerformed
+        // TODO add your handling code here:
+        fillTableStrategy.buildTableModel();
+    }//GEN-LAST:event_btnRefreshActionPerformed
+
     /**
      * @param args the command line arguments
      */
     public static void main(String args[]) {
-        System.load("C:\\Users\\fvcg\\Desktop\\dll\\sigar-amd64-winnt.dll");
+//        System.load("C:\\Users\\fvcg2\\Desktop\\dll\\sigar-amd64-winnt.dll");
+        System.load("C:\\sigar-dll\\sigar-winnt.dll");
 
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -211,15 +254,15 @@ public class ProcessManagerUI extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnExit;
     private javax.swing.JButton btnKillProcess;
-    private javax.swing.JLabel lbProcesses;
+    private javax.swing.JButton btnRefresh;
+    private javax.swing.JCheckBox chbRefresh;
     private javax.swing.JPanel pnOptions;
     private javax.swing.JScrollPane spProcess;
     private javax.swing.JTable tbProcess;
-    private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
 
 
-    public ObservableList<ProcessInfo> getProcessList() {
+    public List<ProcessInfo> getProcessList() {
         return processList;
     }
 }
